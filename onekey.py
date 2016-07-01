@@ -33,12 +33,15 @@ def cleanup(signal, frame):
 	sys.exit('\n[+] Cleaned up')
 
 def iptables(inet_iface):
-	os.system('iptables -X')
-	os.system('iptables -F')
-	os.system('iptables -t nat -F')
-	os.system('iptables -t nat -X')
-	os.system('iptables -t nat -A POSTROUTING -o %s -j MASQUERADE' % inet_iface)
-	os.system('echo 1 > /proc/sys/net/ipv4/ip_forward')
+	try:
+		os.system('iptables -X')
+		os.system('iptables -F')
+		os.system('iptables -t nat -F')
+		os.system('iptables -t nat -X')
+		os.system('iptables -t nat -A POSTROUTING -o %s -j MASQUERADE' % inet_iface)
+		os.system('echo 1 > /proc/sys/net/ipv4/ip_forward')
+	except Exception,e:
+		print e
 
 def rm_mon():
 	monitors = iwconfig()
@@ -64,36 +67,45 @@ def createAP(ap_iface,essid):
 	subprocess.Popen(['airbase-ng', '-c', '7', '-e', essid, mon_iface], stdout=DN, stderr=DN)
 	print '[*] Waiting for 6 seconds...'
 	time.sleep(6)
-	subprocess.Popen(['ifconfig', 'at0', 'up', '10.0.0.1', 'netmask', '255.255.255.0'], stdout=DN, stderr=DN)
-	subprocess.Popen(['ifconfig', 'at0', 'mtu', '1400'], stdout=DN, stderr=DN)
+	try:
+		subprocess.Popen(['ifconfig', 'at0', 'up', '10.0.0.1', 'netmask', '255.255.255.0'], stdout=DN, stderr=DN)
+		subprocess.Popen(['ifconfig', 'at0', 'mtu', '1400'], stdout=DN, stderr=DN)
+	except Exception,e:
+		print e
 
 def dhcp_conf(ipprefix):
-	config = ('default-lease-time 300;\n'
-			  'max-lease-time 360;\n'
-			  'ddns-update-style none;\n'
-			  'authoritative;\n'
-			  'log-facility local7;\n'
-			  'subnet %s netmask 255.255.255.0 {\n'
-			  'range %s;\n'
-			  'option routers %s;\n'
-			  'option domain-name-servers %s;\n'
-			  '}')
-	if ipprefix == '19' or ipprefix == '17':
-		with open('/tmp/dhcpd.conf', 'w') as dhcpconf:
-			# subnet, range, router, dns
-			dhcpconf.write(config % ('10.0.0.0', '10.0.0.2 10.0.0.100', '10.0.0.1', '114.114.114.114'))
-	elif ipprefix == '10':
-		with open('/tmp/dhcpd.conf', 'w') as dhcpconf:
-			dhcpconf.write(config % ('172.16.0.0', '172.16.0.2 172.16.0.100', '172.16.0.1', '114.114.114.114'))
-	return '/tmp/dhcpd.conf'
+	try:
+		config = ('default-lease-time 300;\n'
+				  'max-lease-time 360;\n'
+				  'ddns-update-style none;\n'
+				  'authoritative;\n'
+				  'log-facility local7;\n'
+				  'subnet %s netmask 255.255.255.0 {\n'
+				  'range %s;\n'
+				  'option routers %s;\n'
+				  'option domain-name-servers %s;\n'
+				  '}')
+		if ipprefix == '19' or ipprefix == '17':
+			with open('/tmp/dhcpd.conf', 'w') as dhcpconf:
+				# subnet, range, router, dns
+				dhcpconf.write(config % ('10.0.0.0', '10.0.0.2 10.0.0.100', '10.0.0.1', '114.114.114.114'))
+		elif ipprefix == '10':
+			with open('/tmp/dhcpd.conf', 'w') as dhcpconf:
+				dhcpconf.write(config % ('172.16.0.0', '172.16.0.2 172.16.0.100', '172.16.0.1', '114.114.114.114'))
+		return '/tmp/dhcpd.conf'
+	except Exception,e:
+		print e
 
 def dhcp(dhcpconf, ipprefix):
-	os.system('echo > /var/lib/dhcp/dhcpd.leases')
-	dhcp = subprocess.Popen(['dhcpd', '-cf', dhcpconf], stdout=subprocess.PIPE, stderr=DN)
-	if ipprefix == '19' or ipprefix == '17':
-		os.system('route add -net 10.0.0.0 netmask 255.255.255.0 gw 10.0.0.1')
-	else:
-		os.system('route add -net 172.16.0.0 netmask 255.255.255.0 gw 172.16.0.1')
+	try:
+		os.system('echo > /var/lib/dhcp/dhcpd.leases')
+		dhcp = subprocess.Popen(['dhcpd', '-cf', dhcpconf], stdout=subprocess.PIPE, stderr=DN)
+		if ipprefix == '19' or ipprefix == '17':
+			os.system('route add -net 10.0.0.0 netmask 255.255.255.0 gw 10.0.0.1')
+		else:
+			os.system('route add -net 172.16.0.0 netmask 255.255.255.0 gw 172.16.0.1')
+	except Exception,e:
+		print e
 
 if __name__ == '__main__':
 
@@ -121,7 +133,10 @@ if __name__ == '__main__':
 	while 1:
 		signal.signal(signal.SIGINT, cleanup)
 		os.system('clear')
-		proc = subprocess.Popen(['cat', '/var/lib/dhcp/dhcpd.leases'], stdout=subprocess.PIPE, stderr=DN)
+		try:
+			proc = subprocess.Popen(['cat', '/var/lib/dhcp/dhcpd.leases'], stdout=subprocess.PIPE, stderr=DN)
+		except Exception,e:
+			print e
 		for line in proc.communicate()[0].split('\n'):
 			print line 
 
