@@ -10,14 +10,6 @@ import os
 
 DN = open(os.devnull, 'w')
 
-def get_isc_dhcp_server():
-	if not os.path.isfile('/usr/sbin/dhcpd'):
-		install = raw_input('[*]  isc-dhcp-server not found in /usr/sbin/dhcpd, install now? [y/n] ')
-		if install == 'y':
-			os.system('apt-get -y install isc-dhcp-server')
-		else:
-			sys.exit('[*] isc-dhcp-server not found in /usr/sbin/dhcpd')
-
 def iwconfig():
 	monitors = []
 	proc = subprocess.Popen(['iwconfig'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -105,10 +97,15 @@ def dhcp(dhcpconf, ipprefix):
 
 if __name__ == '__main__':
 
+	# isc-dhcp-server 
+	# http://www.isc.org/downloads/dhcp/
+	# tar xfvz dhcp-****.tar.gz
+	# cd dhcp...
+	# ./configure --prefix=/usr/local
+	# make && make install
+
 	if os.geteuid() != 0:
 		sys.exit('[Error!!!] You must run this script as root')
-
-	get_isc_dhcp_server()
 
 	ap_interface = 'wlan0'
 	inet_iface = 'eth0'
