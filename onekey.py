@@ -56,9 +56,9 @@ def createAP(ap_iface,essid):
 	proc_lines = proc.communicate()[0].split('\n')
 
 	for line in proc_lines:
-		if "monitor mode vif enabled" in line:
+		if "monitor mode enabled" in line:
 			line = line.split()
-			mon_iface = line[8].split(']')[1].split(')')[0]
+			mon_iface = line[4].split(')')[0]
 
 	print '[*] Starting the fake access point...'
 	subprocess.Popen(['airbase-ng', '-c', '7', '-e', essid, mon_iface], stdout=DN, stderr=DN)
