@@ -98,7 +98,7 @@ def dhcp_conf(ipprefix):
 
 def dhcp(dhcpconf, ipprefix):
 	try:
-		os.system('echo > /var/lib/dhcp/dhcpd.leases')
+		os.system('echo > /var/db/dhcpd.leases')
 		dhcp = subprocess.Popen(['dhcpd', '-cf', dhcpconf], stdout=subprocess.PIPE, stderr=DN)
 		if ipprefix == '19' or ipprefix == '17':
 			os.system('route add -net 10.0.0.0 netmask 255.255.255.0 gw 10.0.0.1')
@@ -132,9 +132,9 @@ if __name__ == '__main__':
 
 	while 1:
 		signal.signal(signal.SIGINT, cleanup)
-		# os.system('clear')
+		os.system('clear')
 		try:
-			proc = subprocess.Popen(['cat', '/var/lib/dhcp/dhcpd.leases'], stdout=subprocess.PIPE, stderr=DN)
+			proc = subprocess.Popen(['cat', '/var/db/dhcpd.leases'], stdout=subprocess.PIPE, stderr=DN)
 		except Exception,e:
 			print e
 		for line in proc.communicate()[0].split('\n'):
