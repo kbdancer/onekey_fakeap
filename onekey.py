@@ -132,7 +132,7 @@ if __name__ == '__main__':
 
 	while 1:
 		signal.signal(signal.SIGINT, cleanup)
-		os.system('clear')
+		# os.system('clear')
 		try:
 			proc = subprocess.Popen(['cat', '/var/lib/dhcp/dhcpd.leases'], stdout=subprocess.PIPE, stderr=DN)
 		except Exception,e:
